@@ -1,0 +1,7 @@
+build
+dist
+chrome_profile
+.vscode
+__pycache__
+img
+start.spec
