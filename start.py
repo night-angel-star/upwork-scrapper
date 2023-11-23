@@ -4,6 +4,14 @@ import checkChromeDebugPort
 import bomb
 from settings import *
 import time
+import json
+
+with open('staticPersonInfo.json') as file:
+    # Load the JSON data
+    global staticPersonInfo
+    staticPersonInfo = json.load(file)
+
+print(staticPersonInfo)
 
 
 def __main__():

@@ -110,7 +110,7 @@ def selectRole():
     time.sleep(1)
     click(roleButtonSelector)
     time.sleep(1)
-    applyButtonSelector = ".up-btn.up-btn-primary.width-md.up-btn-block"
+    applyButtonSelector = '[data-qa="btn-apply"]'
     WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located(("css selector", applyButtonSelector)))
     # applyButton = driver.find_element(
@@ -379,9 +379,9 @@ def inputLocation():
     click(imgBtnSelector)
     time.sleep(3)
     uploadButtonSelector = "[data-ev-label='image_crop_input']"
-    uploadButton = WebDriverWait(driver, 20).until(
-        EC.visibility_of_element_located(("css selector", uploadButtonSelector)))
+    uploadButton = driver.find_element("css selector", uploadButtonSelector)
     imagePath = os.path.join(os.getcwd(), "img", f"{random_number}.jpg")
+    print(imagePath)
     uploadButton.send_keys(imagePath)
     time.sleep(2)
     imageSaveBtnSelector = "[data-qa='btn-save']"

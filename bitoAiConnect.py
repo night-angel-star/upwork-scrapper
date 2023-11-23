@@ -125,7 +125,3 @@ def generateLocationInfo(country):
         else:
             time.sleep(1)
             continue
-
-
-result = generateLocationInfo("Latvia")
-print(result)
