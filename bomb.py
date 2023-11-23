@@ -3,6 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 import time
 import os
 import random
@@ -78,18 +79,19 @@ def selectBirthday():
 
 def navigateToUpwork():
     driver.get("https://www.upwork.com")
-
+    acceptCookieButtonSelector = "#onetrust-accept-btn-handler"
     while True:
         try:
-            acceptCookieButtonSelector = "#onetrust-accept-btn-handler"
-            WebDriverWait(driver, 20).until(
-                EC.visibility_of_element_located(("css selector", acceptCookieButtonSelector)))
-            # acceptCookieButton = driver.find_element(
-            #     "css selector", acceptCookieButtonSelector)
-            click(acceptCookieButtonSelector)
+            WebDriverWait(driver, 20).until(EC.visibility_of_element_located(
+                ("css selector", acceptCookieButtonSelector)))
             break
-        except:
+        except TimeoutException:
+            driver.get("https://www.upwork.com")
+            time.sleep(1)
             continue
+    # acceptCookieButton = driver.find_element(
+    #     "css selector", acceptCookieButtonSelector)
+    click(acceptCookieButtonSelector)
 
 
 def navigateToSignUpPage():
@@ -439,57 +441,59 @@ def main(port, personInfo):
     global option
     global driver
     global personInfoOne
-    while True:
-        try:
-            personInfoOne = personInfo
-            option = webdriver.ChromeOptions()
-            # Replace with the actual remote debugging address
-            option.add_experimental_option(
-                "debuggerAddress", f"localhost:{port}")
-            option.add_argument("--incognito")
+    personInfoOne = personInfo
+    option = webdriver.ChromeOptions()
+    # Replace with the actual remote debugging address
+    option.add_experimental_option(
+        "debuggerAddress", f"localhost:{port}")
+    option.add_argument("--incognito")
+    driver = webdriver.Chrome(options=option)
 
-            driver = webdriver.Chrome(options=option)
-            navigateToUpwork()
-            time.sleep(2)
-            navigateToSignUpPage()
-            time.sleep(2)
-            selectRole()
-            time.sleep(2)
-            signUpToUpwork()
-            time.sleep(10)
-            verifyEmail()
-            time.sleep(2)
-            clickGetStarted()
-            time.sleep(2)
-            skipStep()  # skip experience
-            time.sleep(2)
-            skipStep()  # skip goal
-            time.sleep(2)
-            skipStep()  # skip work-experience
-            time.sleep(2)
-            startInputResume()
-            time.sleep(2)
-            inputTitle()
-            time.sleep(2)
-            skipStep()  # skip employment
-            time.sleep(2)
-            inputEducation()
-            time.sleep(2)
-            inputLanguage()
-            time.sleep(2)
-            inputSkills()
-            time.sleep(2)
-            inputOverview()
-            time.sleep(2)
-            inputCategory()
-            time.sleep(2)
-            inputRate()
-            time.sleep(2)
-            inputLocation()
-            time.sleep(2)
-            submitProfile()
-            break
-        except Exception as e:
-            print(e)
-            time.sleep(1)
-            continue
+    navigateToUpwork()
+    time.sleep(2)
+    navigateToSignUpPage()
+    time.sleep(2)
+    selectRole()
+    time.sleep(2)
+    signUpToUpwork()
+    time.sleep(10)
+    verifyEmail()
+    time.sleep(2)
+    clickGetStarted()
+    time.sleep(2)
+    skipStep()  # skip experience
+    time.sleep(2)
+    skipStep()  # skip goal
+    time.sleep(2)
+    skipStep()  # skip work-experience
+    time.sleep(2)
+    startInputResume()
+    time.sleep(2)
+    inputTitle()
+    time.sleep(2)
+    skipStep()  # skip employment
+    time.sleep(2)
+    inputEducation()
+    time.sleep(2)
+    inputLanguage()
+    time.sleep(2)
+    inputSkills()
+    time.sleep(2)
+    inputOverview()
+    time.sleep(2)
+    inputCategory()
+    time.sleep(2)
+    inputRate()
+    time.sleep(2)
+    inputLocation()
+    time.sleep(2)
+    submitProfile()
+    # while True:
+    #     try:
+
+    #         break
+    #     except Exception as e:
+    #         print(e)
+    #         time.sleep(1)
+
+    #         continue

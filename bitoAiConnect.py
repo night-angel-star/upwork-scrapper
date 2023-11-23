@@ -6,6 +6,16 @@ import random
 import time
 
 
+def is_string_contained(main_string, sub_string):
+    pattern = sub_string+r"\d+"
+    matches = re.finditer(pattern, main_string)
+    matched_strings = [match.group() for match in matches]
+    if len(matched_strings) > 0:
+        return True
+    else:
+        return False
+
+
 def resultParser(ai_result):
     try:
         ai_result = ai_result.replace('\n', '')
@@ -117,11 +127,22 @@ def generateLocationInfo(country):
             # Print the output
             ai_result = result.stdout
             ai_result = resultParser(ai_result)
-            if ai_result != "":
-                return ai_result
+            if "birthday" in ai_result and "street" in ai_result and "city" in ai_result and "number" in ai_result:
+                if is_string_contained(ai_result["street"], "Street"):
+                    time.sleep(1)
+                    continue
+                if is_string_contained(ai_result["city"], "City"):
+                    time.sleep(1)
+                    continue
+                if ai_result != "":
+                    return ai_result
+                else:
+                    time.sleep(1)
+                    continue
             else:
                 time.sleep(1)
                 continue
+
         else:
             time.sleep(1)
             continue
