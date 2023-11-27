@@ -134,11 +134,7 @@ def generateLocationInfo(country):
                 if is_string_contained(ai_result["city"], "City"):
                     time.sleep(1)
                     continue
-                if ai_result != "":
-                    return ai_result
-                else:
-                    time.sleep(1)
-                    continue
+                return ai_result
             else:
                 time.sleep(1)
                 continue

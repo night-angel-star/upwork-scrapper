@@ -15,7 +15,6 @@ def getEmailAddress():
             email = data[0]
             login, domain = email.split("@")
             if domain in avaliableDomainList:
-                print({"login": login, "domain": domain})
                 return {"login": login, "domain": domain}
             else:
                 continue

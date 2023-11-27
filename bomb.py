@@ -4,12 +4,77 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import Select
 import time
 import os
 import random
+import threading
 import bitoAiConnect
 import getEmail
+
 from settings import *
+
+
+lock = threading.Lock()
+
+
+def personInfoGet():
+    global personInfo
+    global personInfoGot
+    global personInfoFinish
+    while True:
+        if personInfoFinish:
+            break
+        if not personInfoGot:
+            personInfo = bitoAiConnect.generateName(
+                personInfoOne["country"])
+            personInfoGot = True
+            print("got person info")
+        time.sleep(5)
+
+
+def universityNameGet():
+    global universityName
+    global universityNameGot
+    global universityNameFinish
+    while True:
+        if universityNameFinish:
+            break
+        if not universityNameGot:
+            universityName = bitoAiConnect.generateUniversityName(
+                personInfoOne["country"])
+            universityNameGot = True
+            print("got university name")
+        time.sleep(5)
+
+
+def overviewGet():
+    global overview
+    global overviewGot
+    global overviewFinish
+    while True:
+        if overviewFinish:
+            break
+        if not overviewGot:
+            overview = bitoAiConnect.generateOverview(
+                personInfoOne["title"])
+            overviewGot = True
+            print("got overview")
+        time.sleep(5)
+
+
+def locationInfoGet():
+    global locationInfo
+    global locationInfoGot
+    global locationInfoFinish
+    while True:
+        if locationInfoFinish:
+            break
+        if not locationInfoGot:
+            locationInfo = bitoAiConnect.generateLocationInfo(
+                personInfoOne["country"])
+            locationInfoGot = True
+            print("got location info")
 
 
 def click(selector):
@@ -25,7 +90,13 @@ def simulateTyping(selector, text):
     element = driver.find_element("css selector", selector)
     for i in range(len(text)):
         element.send_keys(text[i])
-        time.sleep(0.1)
+        time.sleep(0.05)
+
+
+def simulateTypingOverview(selector, text):
+    click(selector)
+    element = driver.find_element("css selector", selector)
+    element.send_keys(text)
 
 
 def simulateTypingForDropdown(selector, text):
@@ -36,45 +107,61 @@ def simulateTypingForDropdown(selector, text):
     newElement = driver.find_element("css selector", selector)
     for i in range(len(text)):
         newElement.send_keys(text[i])
-        time.sleep(0.1)
+        time.sleep(0.05)
 
 
 def selectFromDropdown():
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.TAB).perform()
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.TAB).perform()
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.ENTER).perform()
-    time.sleep(1)
+    time.sleep(0.5)
 
 
 def selectLanguage():
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.TAB).perform()
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.TAB).perform()
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.TAB).perform()
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.ENTER).perform()
-    time.sleep(1)
+    time.sleep(0.5)
 
 
 def selectBirthday():
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.TAB).perform()
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.TAB).perform()
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.TAB).perform()
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.TAB).perform()
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.TAB).perform()
-    time.sleep(1)
+    time.sleep(0.5)
     ActionChains(driver).send_keys(Keys.ENTER).perform()
-    time.sleep(1)
+    time.sleep(0.5)
+
+
+def selectElement(selector, value):
+    click(selector)
+    WebDriverWait(driver, 20).until(EC.visibility_of_element_located(
+        ("css selector", ".up-dropdown-menu-container")))
+
+    countryElements = driver.find_elements(
+        "css selector", ".up-menu-item-text")
+    for countryElement in countryElements:
+        if countryElement.text.strip() == value:
+            try:
+                countryElement.click()
+            except:
+                driver.execute_script("arguments[0].click();", countryElement)
+            break
 
 
 def navigateToUpwork():
@@ -148,6 +235,8 @@ def selectRole():
 
 
 def signUpToUpwork():
+    global personInfo
+    global personInfoGot
     while True:
         try:
 
@@ -171,6 +260,8 @@ def signUpToUpwork():
                 EC.visibility_of_element_located(("css selector", passwordInputSelector)))
             # passwordInput = driver.find_element("css selector", passwordInputSelector)
 
+            countrySelectSelector = "#country-dropdown"
+
             checkboxs = driver.find_elements(
                 "css selector", ".up-checkbox-replacement-helper")
 
@@ -178,31 +269,39 @@ def signUpToUpwork():
             WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located(("css selector", submitButtonSelector)))
             # submitButton = driver.find_element("css selector", submitButtonSelector)
-
-            personInfo = bitoAiConnect.generateName(personInfoOne["country"])
-
+            while not personInfoGot:
+                print("waiting for person info")
+                time.sleep(5)
             firstName = personInfo["firstName"]
             lastName = personInfo["lastName"]
             password = "Night-Angel-610"
             email = emailInfo["login"]+"@"+emailInfo["domain"]
 
             simulateTyping(firstNameInputSelector, firstName)
-            time.sleep(1)
+            time.sleep(0.5)
             simulateTyping(lastNameInputSelector, lastName)
-            time.sleep(1)
+            time.sleep(0.5)
             simulateTyping(emailInputSelector, email)
-            time.sleep(1)
+            time.sleep(0.5)
             simulateTyping(passwordInputSelector, password)
-            time.sleep(1)
+            time.sleep(0.5)
+            WebDriverWait(driver, 20).until(
+                EC.visibility_of_element_located(("css selector", countrySelectSelector)))
+            time.sleep(0.5)
+            selectElement(countrySelectSelector, personInfoOne["country"])
+            time.sleep(0.5)
             for checkbox in checkboxs:
                 checkbox.click()
-                time.sleep(1)
+                time.sleep(0.5)
             click(submitButtonSelector)
-            time.sleep(1)
+            time.sleep(0.5)
             print("Signed up to Upwork")
             break
-        except:
+        except Exception as e:
+            print(e)
             print("sign up failed. retrying")
+            with lock:
+                personInfoGot = False
             driver.refresh()
             time.sleep(1)
             selectRole()
@@ -318,7 +417,7 @@ def inputTitle():
                 EC.visibility_of_element_located(("css selector", inputBtnSelector)))
             # inputBtn = driver.find_element("css selector", inputBtnSelector)
             simulateTyping(inputBtnSelector, personInfoOne["title"])
-            time.sleep(1)
+            time.sleep(0.5)
             break
         except:
             print("title error. retrying")
@@ -350,6 +449,8 @@ def skipExperience():
 
 
 def inputEducation():
+    global universityName
+    global universityNameGot
     while True:
         try:
             while driver.current_url != "https://www.upwork.com/nx/create-profile/education":
@@ -372,8 +473,10 @@ def inputEducation():
                 EC.visibility_of_element_located(("css selector", schoolSelector)))
             # schoolInput = driver.find_element(
             #     "css selector", schoolSelector)
-            universityName = bitoAiConnect.generateUniversityName(
-                personInfoOne["country"])
+            while not universityNameGot:
+                print("waiting for university name")
+                time.sleep(5)
+
             simulateTypingForDropdown(schoolSelector, universityName)
             time.sleep(0.5)
             selectFromDropdown()
@@ -409,6 +512,8 @@ def inputEducation():
         except:
             print("input education error. retrying")
             time.sleep(2)
+            with lock:
+                universityNameGot = False
             driver.refresh()
             time.sleep(1)
             continue
@@ -416,6 +521,7 @@ def inputEducation():
 
 
 def inputLanguage():
+    global universityNameGot
     while True:
         try:
             while driver.current_url != "https://www.upwork.com/nx/create-profile/languages":
@@ -425,6 +531,8 @@ def inputLanguage():
                 print("url not match", driver.current_url,
                       "https://www.upwork.com/nx/create-profile/languages")
                 driver.refresh()
+                with lock:
+                    universityNameGot = False
                 inputEducation()
             languageInputSelector = '[aria-controls="dropdown-menu"]'
             WebDriverWait(driver, 20).until(
@@ -477,6 +585,8 @@ def inputSkills():
 
 
 def inputOverview():
+    global overview
+    global overviewGot
     while True:
         try:
             while driver.current_url != "https://www.upwork.com/nx/create-profile/overview":
@@ -492,20 +602,25 @@ def inputOverview():
                 EC.visibility_of_element_located(("css selector", overviewInputSelector)))
             # overviewInput = driver.find_element(
             #     "css selector", overviewInputSelector)
-            overview = bitoAiConnect.generateOverview(personInfoOne["title"])
-            simulateTyping(overviewInputSelector, overview)
+            while not overviewGot:
+                print("waiting for overview")
+                time.sleep(5)
+            simulateTypingOverview(overviewInputSelector, overview)
             time.sleep(1)
             nextStep()
             break
         except:
             print("input overview error, retrying")
             time.sleep(2)
+            with lock:
+                overviewGot = False
             driver.refresh()
             time.sleep(1)
             continue
 
 
 def inputCategory():
+    global overviewGot
     while True:
         try:
             while driver.current_url != "https://www.upwork.com/nx/create-profile/categories":
@@ -515,7 +630,10 @@ def inputCategory():
                 print("url not match", driver.current_url,
                       "https://www.upwork.com/nx/create-profile/categories")
                 driver.refresh()
+                with lock:
+                    overviewGot = False
                 inputOverview()
+
             categoryButtonSelector = f"[aria-label='{
                 personInfoOne["category"]}']"
             WebDriverWait(driver, 20).until(
@@ -605,10 +723,13 @@ def inputImg():
 
 
 def inputLocation():
+    global locationInfo
+    global locationInfoGot
     while True:
         try:
-            locationInfo = bitoAiConnect.generateLocationInfo(
-                personInfoOne["country"])
+            while not locationInfoGot:
+                print("waiting for location info")
+                time.sleep(5)
             birthday = locationInfo['birthday']
             street = locationInfo['street']
             city = locationInfo['city']
@@ -646,12 +767,15 @@ def inputLocation():
         except:
             print("input location error, retrying")
             time.sleep(2)
+            with lock:
+                locationInfoGot = False
             driver.refresh()
             time.sleep(1)
             continue
 
 
 def submitProfile():
+    global locationInfoGot
     while True:
         try:
             while driver.current_url != "https://www.upwork.com/nx/create-profile/submit":
@@ -661,7 +785,10 @@ def submitProfile():
                 print("url not match", driver.current_url,
                       "https://www.upwork.com/nx/create-profile/submit")
                 driver.refresh()
+                with lock:
+                    locationInfoGot = False
                 inputLocation()
+
             submitBtnSelector = '[data-qa="submit-profile-top-btn"]'
             WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located(("css selector", submitBtnSelector)))
@@ -677,11 +804,46 @@ def submitProfile():
             continue
 
 
-def main(port, personInfo):
+def main(port, personInfoFromMain):
     global option
     global driver
     global personInfoOne
-    personInfoOne = personInfo
+
+    global personInfo, universityName, overview, locationInfo
+
+    personInfo = {}
+    universityName = ""
+    overview = ""
+    locationInfo = {}
+
+    global personInfoGot, universityNameGot, overviewGot, locationInfoGot
+
+    personInfoGot = False
+    universityNameGot = False
+    overviewGot = False
+    locationInfoGot = False
+
+    global personInfoFinish, universityNameFinish, overviewFinish, locationInfoFinish
+
+    personInfoFinish = False
+    universityNameFinish = False
+    overviewFinish = False
+    locationInfoFinish = False
+
+    personInfoOne = personInfoFromMain
+
+    personInfoThread = threading.Thread(target=personInfoGet)
+    personInfoThread.start()
+
+    universityNameThread = threading.Thread(target=universityNameGet)
+    universityNameThread.start()
+
+    overviewThread = threading.Thread(target=overviewGet)
+    overviewThread.start()
+
+    locationInfoThread = threading.Thread(target=locationInfoGet)
+    locationInfoThread.start()
+
     option = webdriver.ChromeOptions()
     # Replace with the actual remote debugging address
     option.add_experimental_option(
@@ -730,6 +892,11 @@ def main(port, personInfo):
     inputLocation()
     time.sleep(2)
     submitProfile()
+    with lock:
+        personInfoFinish = True
+        universityNameFinish = True
+        locationInfoFinish = True
+        overviewFinish = True
     # while True:
     #     try:
 

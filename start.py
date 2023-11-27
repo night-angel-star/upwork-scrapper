@@ -11,8 +11,6 @@ with open('staticPersonInfo.json') as file:
     global staticPersonInfo
     staticPersonInfo = json.load(file)
 
-print(staticPersonInfo)
-
 
 def __main__():
     for i, personInfo in enumerate(staticPersonInfo):
